@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.lang.Runtime;
 import java.net.NetworkInterface;
-
+import java.io.File;
 import javax.annotation.Nullable;
 
 public class RNDeviceModule extends ReactContextBaseJavaModule {
@@ -181,7 +181,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       }
     }
 
-    p.resolve(macAddress);    
+    p.resolve(macAddress);
   }
 
   @ReactMethod
@@ -191,10 +191,13 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public Integer getTotalDiskCapacity() {
+  public Long getTotalDiskCapacity() {
     try {
-      StatFs root = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-      return root.getBlockCount() * root.getBlockSize();
+      File sdcardDir = Environment.getExternalStorageDirectory();
+      StatFs statFs = new StatFs(sdcardDir.getPath());
+      long blockSize = statFs.getBlockSizeLong();
+      long totalSize = statFs.getBlockCountLong();
+      return blockSize * totalSize;
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -202,10 +205,13 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public Integer getFreeDiskStorage() {
+  public Long getFreeDiskStorage() {
     try {
-      StatFs external = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-      return external.getAvailableBlocks() * external.getBlockSize();
+      File path = Environment.getExternalStorageDirectory();
+      StatFs statFs = new StatFs(path.getPath());
+      long blockSize = statFs.getBlockSizeLong();
+      long availableBlocks = statFs.getAvailableBlocksLong();
+      return blockSize * availableBlocks;
     } catch (Exception e) {
       e.printStackTrace();
     }
